@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>誕生日メモ</title>
+<style>
+  :root {
+    --bg: #f5f4f0;
+    --card: #ffffff;
+    --text: #2c2a26;
+    --sub: #79736b;
+    --line: #e3e0d8;
+    --accent: #e0674f;
+    --accent-dark: #c4543d;
+    --human: #4a7fb5;
+    --pet: #b57a3c;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 0 0 40px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", "Yu Gothic", sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-text-size-adjust: 100%;
+  }
+  .wrap {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 0 12px;
+  }
+  header {
+    padding: 18px 0 12px;
+  }
+  h1 {
+    font-size: 20px;
+    margin: 0 0 2px;
+    letter-spacing: 0.04em;
+  }
+  .lead {
+    font-size: 12px;
+    color: var(--sub);
+    margin: 0;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 16px;
+  }
+  label {
+    display: block;
+    font-size: 12px;
+    color: var(--sub);
+    margin-bottom: 4px;
+  }
+  .field { margin-bottom: 12px; }
+  input[type="text"],
+  input[type="date"],
+  select {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    font-family: inherit;
+    color: var(--text);
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+  }
+  input:focus, select:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: -1px;
+  }
+  .btn-add {
+    width: 100%;
+    padding: 12px;
+    font-size: 15px;
+    font-family: inherit;
+    font-weight: bold;
+    color: #fff;
+    background: var(--accent);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  .btn-add:active { background: var(--accent-dark); }
+  .msg {
+    font-size: 12px;
+    color: var(--accent-dark);
+    margin: 8px 0 0;
+    min-height: 1.2em;
+  }
+  h2 {
+    font-size: 13px;
+    color: var(--sub);
+    font-weight: normal;
+    margin: 0 0 8px;
+    padding-left: 2px;
+  }
+  ul { list-style: none; margin: 0; padding: 0; }
+  li {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  li.today {
+    border-color: var(--accent);
+    background: #fff6f3;
+    box-shadow: 0 0 0 2px rgba(224,103,79,0.18);
+  }
+  .info { flex: 1 1 auto; min-width: 0; }
+  .name-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .name {
+    font-size: 16px;
+    font-weight: bold;
+    word-break: break-all;
+  }
+  .tag {
+    flex: 0 0 auto;
+    font-size: 11px;
+    padding: 1px 7px;
+    border-radius: 99px;
+    color: #fff;
+    background: var(--human);
+  }
+  .tag.pet { background: var(--pet); }
+  .meta {
+    font-size: 12px;
+    color: var(--sub);
+    margin-top: 2px;
+  }
+  .countdown {
+    font-size: 13px;
+    margin-top: 4px;
+  }
+  .days {
+    font-weight: bold;
+    font-size: 15px;
+    color: var(--accent-dark);
+  }
+  .today-badge {
+    display: inline-block;
+    font-size: 14px;
+    font-weight: bold;
+    color: #fff;
+    background: var(--accent);
+    border-radius: 6px;
+    padding: 3px 10px;
+    margin-top: 4px;
+  }
+  .btn-del {
+    flex: 0 0 auto;
+    align-self: center;
+    font-size: 12px;
+    font-family: inherit;
+    color: var(--sub);
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 6px 9px;
+    cursor: pointer;
+  }
+  .btn-del:active { background: #f0eeea; }
+  .empty {
+    color: var(--sub);
+    font-size: 13px;
+    text-align: center;
+    padding: 24px 8px;
+    border: 1px dashed var(--line);
+    border-radius: 10px;
+  }
+  footer {
+    font-size: 11px;
+    color: var(--sub);
+    text-align: center;
+    margin-top: 20px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>誕生日メモ</h1>
+    <p class="lead">人とペットの誕生日を記録して、次の誕生日までの日数を確認できます。</p>
+  </header>
+
+  <div class="card">
+    <div class="field">
+      <label for="name">名前</label>
+      <input type="text" id="name" maxlength="40" placeholder="例：山田 太郎／ポチ" autocomplete="off">
+    </div>
+    <div class="field">
+      <label for="birth">誕生日</label>
+      <input type="date" id="birth" min="1900-01-01">
+    </div>
+    <div class="field">
+      <label for="kind">種別</label>
+      <select id="kind">
+        <option value="human">人</option>
+        <option value="pet">ペット</option>
+      </select>
+    </div>
+    <button type="button" class="btn-add" id="add">登録する</button>
+    <p class="msg" id="msg"></p>
+  </div>
+
+  <h2 id="heading">登録一覧（次の誕生日が近い順）</h2>
+  <ul id="list"></ul>
+  <div class="empty" id="empty">まだ登録がありません。上のフォームから追加してください。</div>
+
+  <footer>データはこの端末のブラウザ（localStorage）にのみ保存されます。</footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var STORAGE_KEY = "birthday-log.entries.v1";
+
+  var nameInput = document.getElementById("name");
+  var birthInput = document.getElementById("birth");
+  var kindInput = document.getElementById("kind");
+  var addButton = document.getElementById("add");
+  var msgEl = document.getElementById("msg");
+  var listEl = document.getElementById("list");
+  var emptyEl = document.getElementById("empty");
+
+  /* ---------- 保存 ---------- */
+
+  function loadEntries() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) { return []; }
+      var parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function saveEntries(entries) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /* ---------- 日付計算 ---------- */
+
+  function isLeapYear(y) {
+    return (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0;
+  }
+
+  function today() {
+    var n = new Date();
+    return new Date(n.getFullYear(), n.getMonth(), n.getDate());
+  }
+
+  function parseBirth(str) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(str || ""));
+    if (!m) { return null; }
+    var y = Number(m[1]), mo = Number(m[2]), d = Number(m[3]);
+    var probe = new Date(y, mo - 1, d);
+    if (probe.getFullYear() !== y || probe.getMonth() !== mo - 1 || probe.getDate() !== d) {
+      return null;
+    }
+    return { year: y, month: mo, day: d };
+  }
+
+  // その年の誕生日。2/29 はうるう年以外は 2/28 として扱う。
+  function occurrenceIn(birth, year) {
+    var day = birth.day;
+    if (birth.month === 2 && birth.day === 29 && !isLeapYear(year)) {
+      day = 28;
+    }
+    return new Date(year, birth.month - 1, day);
+  }
+
+  function nextBirthday(birth, base) {
+    var year = base.getFullYear();
+    var date = occurrenceIn(birth, year);
+    if (date.getTime() < base.getTime()) {
+      year += 1;
+      date = occurrenceIn(birth, year);
+    }
+    var days = Math.round((date.getTime() - base.getTime()) / 86400000);
+    return {
+      date: date,
+      year: year,
+      days: days,
+      age: year - birth.year,
+      shifted: (birth.month === 2 && birth.day === 29 && !isLeapYear(year))
+    };
+  }
+
+  function formatJPDate(y, m, d) {
+    return y + "年" + m + "月" + d + "日";
+  }
+
+  /* ---------- 表示 ---------- */
+
+  function makeEl(tag, className, text) {
+    var el = document.createElement(tag);
+    if (className) { el.className = className; }
+    if (text !== undefined && text !== null) { el.textContent = String(text); }
+    return el;
+  }
+
+  function render() {
+    var entries = loadEntries();
+    var base = today();
+
+    var rows = [];
+    for (var i = 0; i < entries.length; i++) {
+      var e = entries[i];
+      var birth = parseBirth(e && e.birth);
+      if (!birth || !e.id) { continue; }
+      rows.push({ entry: e, birth: birth, next: nextBirthday(birth, base) });
+    }
+
+    rows.sort(function (a, b) {
+      if (a.next.days !== b.next.days) { return a.next.days - b.next.days; }
+      return String(a.entry.name).localeCompare(String(b.entry.name), "ja");
+    });
+
+    listEl.textContent = "";
+    emptyEl.style.display = rows.length === 0 ? "block" : "none";
+
+    rows.forEach(function (row) {
+      var isPet = row.entry.kind === "pet";
+      var li = makeEl("li", row.next.days === 0 ? "today" : "");
+
+      var info = makeEl("div", "info");
+
+      var nameRow = makeEl("div", "name-row");
+      nameRow.appendChild(makeEl("span", "name", row.entry.name));
+      nameRow.appendChild(makeEl("span", isPet ? "tag pet" : "tag", isPet ? "ペット" : "人"));
+      info.appendChild(nameRow);
+
+      var metaText = formatJPDate(row.birth.year, row.birth.month, row.birth.day) + "生まれ";
+      if (row.next.shifted) {
+        metaText += "（今年は2月28日に表示）";
+      }
+      info.appendChild(makeEl("div", "meta", metaText));
+
+      if (row.next.days === 0) {
+        info.appendChild(makeEl("div", "today-badge", "🎉 今日が誕生日！ " + row.next.age + "歳になりました"));
+      } else {
+        var cd = makeEl("div", "countdown");
+        cd.appendChild(makeEl("span", "", "あと "));
+        cd.appendChild(makeEl("span", "days", row.next.days + "日"));
+        cd.appendChild(makeEl("span", "",
+          "（" + formatJPDate(row.next.date.getFullYear(), row.next.date.getMonth() + 1, row.next.date.getDate()) +
+          "に" + row.next.age + "歳）"));
+        info.appendChild(cd);
+      }
+
+      var del = makeEl("button", "btn-del", "削除");
+      del.type = "button";
+      del.addEventListener("click", function () {
+        if (!window.confirm("「" + row.entry.name + "」を削除します。よろしいですか？")) { return; }
+        var current = loadEntries().filter(function (x) { return x.id !== row.entry.id; });
+        saveEntries(current);
+        render();
+      });
+
+      li.appendChild(info);
+      li.appendChild(del);
+      listEl.appendChild(li);
+    });
+  }
+
+  /* ---------- 追加 ---------- */
+
+  function showMessage(text) {
+    msgEl.textContent = text;
+  }
+
+  function addEntry() {
+    var name = nameInput.value.trim();
+    var birthStr = birthInput.value;
+
+    if (name === "") {
+      showMessage("名前を入力してください。");
+      nameInput.focus();
+      return;
+    }
+    var birth = parseBirth(birthStr);
+    if (!birth) {
+      showMessage("誕生日を正しく入力してください。");
+      birthInput.focus();
+      return;
+    }
+    var base = today();
+    if (new Date(birth.year, birth.month - 1, birth.day).getTime() > base.getTime()) {
+      showMessage("未来の日付は登録できません。");
+      birthInput.focus();
+      return;
+    }
+
+    var entries = loadEntries();
+    entries.push({
+      id: String(Date.now()) + "-" + Math.random().toString(36).slice(2, 8),
+      name: name,
+      birth: birthStr,
+      kind: kindInput.value === "pet" ? "pet" : "human"
+    });
+
+    if (!saveEntries(entries)) {
+      showMessage("保存に失敗しました。ブラウザの設定をご確認ください。");
+      return;
+    }
+
+    nameInput.value = "";
+    birthInput.value = "";
+    kindInput.value = "human";
+    showMessage("登録しました。");
+    render();
+    nameInput.focus();
+  }
+
+  addButton.addEventListener("click", addEntry);
+  nameInput.addEventListener("keydown", function (ev) {
+    if (ev.key === "Enter") { addEntry(); }
+  });
+  [nameInput, birthInput].forEach(function (el) {
+    el.addEventListener("input", function () { showMessage(""); });
+  });
+
+  birthInput.max = (function () {
+    var t = today();
+    function pad(n) { return n < 10 ? "0" + n : String(n); }
+    return t.getFullYear() + "-" + pad(t.getMonth() + 1) + "-" + pad(t.getDate());
+  })();
+
+  render();
+})();
+</script>
+</body>
+</html>
